@@ -5,12 +5,14 @@ import com.gollajo.domain.account.service.AccountService;
 import com.gollajo.domain.exception.CustomException;
 import com.gollajo.domain.exception.ErrorCode;
 import com.gollajo.domain.member.dto.CreateMemberRequest;
+import com.gollajo.domain.member.dto.RequestMypageDto;
 import com.gollajo.domain.member.entity.Member;
 import com.gollajo.domain.member.entity.enums.Grade;
 import com.gollajo.domain.exception.handler.MemberExceptionHandler;
 import com.gollajo.domain.member.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +21,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional
 @Service
+@Slf4j
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -28,10 +31,12 @@ public class MemberService {
 
     public Member register(final Member member){
 
-        final Member maybeMember = memberRepository.findBySocialIdAndSocialType(member.getSocialId(), member.getSocialType())
-                .orElseThrow(()-> new CustomException(ErrorCode.NO_MEMBER));
+//        final Member maybeMember = memberRepository.findBySocialIdAndSocialType(member.getSocialId(), member.getSocialType())
+//                .orElseThrow(()-> new CustomException(ErrorCode.NO_MEMBER));
 
-        return maybeMember;
+        Member savedMember = memberRepository.save(member);
+
+        return savedMember;
     }
 
     public String signUp(CreateMemberRequest request){
@@ -58,6 +63,18 @@ public class MemberService {
         memberExceptionHandler.findByIdException(memberId);
 
         return memberRepository.findById(memberId).get();
+    }
+
+    public boolean existsByEmail(String email){
+
+        return memberRepository.existsByEmail(email);
+    }
+
+    public Member findByEmail(String email){
+
+        memberExceptionHandler.findByEmailException(email);
+
+        return memberRepository.findByEmail(email).get();
     }
 
     //내 정보를 업데이트 한다.
@@ -111,6 +128,10 @@ public class MemberService {
 
         //TODO : adminMember가 운영자권한인지 확인해서 아니면 예외처리하기
 
+        if(adminMember.getId()!=3L){
+            throw new CustomException(ErrorCode.NO_AUTHORITY);
+        }
+
         targetMember.plusPoint(amount);
         memberRepository.save(targetMember);
 
@@ -118,6 +139,22 @@ public class MemberService {
         accountService.savePaymentAccount(targetMember, amount);
 
         return targetMember.getPoint();
+    }
+
+    public RequestMypageDto getMypageInfo(Member member){
+        int accumulatedPoints = accountService.showMyAccumulatedPoints(member);
+        RequestMypageDto mypageDto = RequestMypageDto.builder()
+                .accumulatedPoints(accumulatedPoints)
+                .age(member.getAge())
+                .gender(member.getGender())
+                .numOfVoting(member.getNumOfVoting())
+                .point(member.getPoint())
+                .grade(member.getGrade())
+                .email(member.getEmail())
+                .nickname(member.getNickname())
+                .socialType(member.getSocialType())
+                .build();
+        return mypageDto;
     }
 
 }

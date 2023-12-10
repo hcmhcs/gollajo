@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
 
+    ALL(HttpStatus.BAD_REQUEST,000,"잡다한 예외 모두"),
+
     //인증예외(1번대)
     NO_AUTHORITY(HttpStatus.BAD_REQUEST, 100, "권한 없습니다."),
 
@@ -48,6 +50,8 @@ public enum ErrorCode {
     NO_MATCH_TIME(HttpStatus.BAD_REQUEST,601,"거래내역에 적힌 날짜와 투표생성날짜가 다릅니다."),
     NO_WITHDRAW_HISTORY(HttpStatus.BAD_REQUEST, 602,"포인트가 차감된 기록이 없습니다"),
     NO_ACCOuNT_HISTORY(HttpStatus.BAD_REQUEST,603,"거래내역이 존재하지 않습니다"),
+
+    INTEGRATE_ERROR(HttpStatus.BAD_REQUEST,1000,"아직 분류전 모든 통합 예외"),
     ;
 
 
