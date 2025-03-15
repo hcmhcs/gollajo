@@ -90,16 +90,23 @@ public class Member extends BaseTimeEntity {
     public static Member createKakaoMember(final KakaoMemberResponse response){
 
         final NicknameNumberGenerator nicknameNumberGenerator = new NicknameNumberGenerator();
-
+        Gender optionalGender = null;
+        if(response.kakaoAccount().gender()!=null){
+            optionalGender = Gender.valueOf(response.kakaoAccount().gender().toUpperCase());
+        }
         return Member.builder()
                 .email(response.kakaoAccount().email())
-                .nickname("익명의 사용자" + nicknameNumberGenerator.generate())
+//                .nickname("익명의 사용자" + nicknameNumberGenerator.generate())
+                .nickname(response.kakaoAccount().profile().nickname())
                 .socialType(SocialType.KAKAO)
                 .socialId(response.id().toString())
-                .point(0)
+                .point(1000)
+                .age(0)
                 .grade(Grade.LV1)
                 .numOfVoting(0)
-                .gender(Gender.valueOf(response.kakaoAccount().gender().toUpperCase()))
+                .gender(optionalGender)
                 .build();
     }
+
+
 }
